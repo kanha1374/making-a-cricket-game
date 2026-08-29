@@ -11,9 +11,18 @@ def test_index_loads():
     assert b"Magical Math Editor" in response.data
 
 
+def test_presets_endpoint_returns_standard():
+    client = create_app().test_client()
+    response = client.get("/api/presets")
+    assert response.status_code == 200
+    body = response.get_json()
+    assert "standard" in body["presets"]
+
+
 def test_render_endpoint_returns_png():
     client = create_app().test_client()
     config = {
+        "preset": "standard",
         "field_filter": "all",
         "xw_angle": 20,
         "yz_angle": 40,
@@ -36,9 +45,16 @@ def test_render_endpoint_returns_png():
 
     assert response.status_code == 200
     assert response.mimetype == "image/png"
+    assert "X-Render-Time-Ms" in response.headers
 
 
 def test_bad_config_returns_400():
     client = create_app().test_client()
     response = client.post("/api/render", data={"config": "not-json"})
+    assert response.status_code == 400
+
+
+def test_invalid_preset_returns_400():
+    client = create_app().test_client()
+    response = client.post("/api/render", data={"config": json.dumps({"preset": "unknown"})})
     assert response.status_code == 400

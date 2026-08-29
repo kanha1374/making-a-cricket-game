@@ -11,6 +11,14 @@
     <aside class="panel">
       <h1>Magical Math Editor</h1>
 
+      <label>Quality Preset
+        <select id="presetSelect">
+          {% for preset in presets %}
+          <option value="{{ preset }}" {% if preset == 'standard' %}selected{% endif %}>{{ preset.title() }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
       <label>Image Upload
         <input type="file" id="imageUpload" accept="image/*" />
       </label>

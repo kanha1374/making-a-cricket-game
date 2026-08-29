@@ -18,8 +18,11 @@ Open `http://localhost:8000`.
 - Image upload + generated default room
 - Real-time mathematical overlays with domain filtering/toggles
 - Hypercube angle, density, stroke, glow, floor-shear controls
+- Quality presets: draft, standard, maximum
 - Perspective projection + glow compositing + deterministic render path
+- Render-time response headers with frame target feedback
 - High-resolution export endpoint
+- Upload size safeguard and input validation
 - Automated tests for API and deterministic rendering
 
 ## Test

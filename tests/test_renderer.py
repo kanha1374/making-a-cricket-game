@@ -1,8 +1,17 @@
 from app.models import RenderConfig
 from app.services.export import encode_png
-from app.services.image_pipeline import generate_default_room
+from app.services.image_pipeline import generate_default_room, load_image_from_upload
 from app.services.renderer import render_scene
 from PIL import Image
+
+
+class _Upload:
+    def __init__(self, data: bytes, filename: str = "x.png"):
+        self._data = data
+        self.filename = filename
+
+    def read(self):
+        return self._data
 
 
 def test_render_is_deterministic(tmp_path):
@@ -26,3 +35,14 @@ def test_floor_shear_changes_output(tmp_path):
     img_b = render_scene(base, RenderConfig(floor_shear=0.3))
 
     assert encode_png(img_a) != encode_png(img_b)
+
+
+def test_upload_size_limit_enforced(tmp_path):
+    fallback = tmp_path / "fallback.png"
+    generate_default_room(fallback, (400, 240))
+    upload = _Upload(b"x" * 20, "x.png")
+    try:
+        load_image_from_upload(upload, fallback, max_upload_bytes=10)
+        assert False
+    except ValueError:
+        assert True

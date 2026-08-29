@@ -11,14 +11,12 @@ def generate_default_room(path: Path, size: tuple[int, int] = (1280, 720)) -> No
     width, height = size
     img = Image.new("RGB", size, "#080b16")
     draw = ImageDraw.Draw(img)
-    # back wall gradient
     for y in range(height):
         t = y / max(1, height - 1)
         r = int(8 + 16 * t)
         g = int(11 + 26 * t)
         b = int(22 + 38 * t)
         draw.line([(0, y), (width, y)], fill=(r, g, b))
-    # floor trapezoid
     draw.polygon(
         [
             (0, int(height * 0.62)),
@@ -31,11 +29,13 @@ def generate_default_room(path: Path, size: tuple[int, int] = (1280, 720)) -> No
     img.save(path, format="PNG")
 
 
-def load_image_from_upload(file_storage, fallback_path: Path) -> Image.Image:
+def load_image_from_upload(file_storage, fallback_path: Path, max_upload_bytes: int) -> Image.Image:
     if file_storage and file_storage.filename:
         data = file_storage.read()
         if not data:
             raise ValueError("Uploaded file is empty")
+        if len(data) > max_upload_bytes:
+            raise ValueError("Uploaded image is too large")
         image = Image.open(io.BytesIO(data)).convert("RGB")
         return image
 

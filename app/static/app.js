@@ -1,5 +1,6 @@
 const state = {
   imageFile: null,
+  preset: 'standard',
   field_filter: 'all',
   xw_angle: 35,
   yz_angle: 20,
@@ -8,6 +9,12 @@ const state = {
   glow_strength: 0.45,
   floor_shear: 0.18,
   domains_enabled: {}
+};
+
+const presets = {
+  standard: { density: 0.5, stroke_thickness: 2, glow_strength: 0.45, floor_shear: 0.18 },
+  maximum: { density: 0.9, stroke_thickness: 4, glow_strength: 0.8, floor_shear: 0.22 },
+  draft: { density: 0.3, stroke_thickness: 1, glow_strength: 0.25, floor_shear: 0.12 }
 };
 
 const statusEl = document.getElementById('status');
@@ -27,8 +34,23 @@ function setStatus(msg) {
 
 function updateDisplayValues() {
   Object.entries(controlMap).forEach(([id, [key, outId]]) => {
-    document.getElementById(outId).textContent = state[key];
+    const value = state[key];
+    document.getElementById(outId).textContent = typeof value === 'number' ? Number(value.toFixed(2)) : value;
+    const input = document.getElementById(id);
+    if (id === 'stroke') {
+      input.value = parseInt(value, 10);
+    } else {
+      input.value = value;
+    }
   });
+}
+
+function applyPreset(name) {
+  const preset = presets[name];
+  if (!preset) return;
+  state.preset = name;
+  Object.assign(state, preset);
+  updateDisplayValues();
 }
 
 async function render(highRes = false) {
@@ -51,6 +73,9 @@ async function render(highRes = false) {
       throw new Error(err.error || 'Render failed');
     }
 
+    const ms = parseFloat(response.headers.get('X-Render-Time-Ms') || '0');
+    const target = parseFloat(response.headers.get('X-Frame-Target-Ms') || '33');
+
     const blob = await response.blob();
     if (highRes) {
       const url = URL.createObjectURL(blob);
@@ -59,12 +84,12 @@ async function render(highRes = false) {
       a.download = 'higdimetric-render.png';
       a.click();
       URL.revokeObjectURL(url);
-      setStatus('High-res export downloaded');
+      setStatus(`High-res export downloaded (${ms.toFixed(1)}ms)`);
       return;
     }
 
     renderedImage.src = URL.createObjectURL(blob);
-    setStatus('Ready');
+    setStatus(`Ready (${ms.toFixed(1)}ms, target ${target.toFixed(0)}ms)`);
   } catch (err) {
     setStatus(err.message);
   }
@@ -90,6 +115,11 @@ function init() {
     scheduleRender();
   });
 
+  document.getElementById('presetSelect').addEventListener('change', (e) => {
+    applyPreset(e.target.value);
+    scheduleRender();
+  });
+
   Object.entries(controlMap).forEach(([id, [key]]) => {
     document.getElementById(id).addEventListener('input', (e) => {
       const raw = e.target.value;
@@ -112,7 +142,7 @@ function init() {
 
   document.getElementById('exportBtn').addEventListener('click', () => render(true));
 
-  updateDisplayValues();
+  applyPreset(state.preset);
   render(false);
 }
 
