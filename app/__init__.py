@@ -52,8 +52,8 @@ def create_app() -> Flask:
                 result = upscale_for_export(result, factor=2)
             body = encode_png(result)
             return Response(body, mimetype="image/png")
-        except ValueError as exc:
-            return _bad_request(str(exc))
+        except ValueError:
+            return _bad_request("Invalid input payload")
         except Exception:
             return _bad_request("Rendering failed", HTTPStatus.INTERNAL_SERVER_ERROR)
 
