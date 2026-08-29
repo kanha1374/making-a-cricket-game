@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Higdimetric Engine Editor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="panel">
+      <h1>Magical Math Editor</h1>
+
+      <label>Image Upload
+        <input type="file" id="imageUpload" accept="image/*" />
+      </label>
+
+      <button id="loadDefault">Load Default Room</button>
+
+      <label>Mathematical Field Filter
+        <select id="fieldFilter">
+          <option value="all">All Fields</option>
+          {% for domain in domains %}
+          <option value="{{ domain }}">{{ domain.replace('_', ' ').title() }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <div class="group">
+        <h2>Domain Toggles</h2>
+        {% for domain in domains %}
+        <label class="toggle">
+          <input type="checkbox" class="domain-toggle" data-domain="{{ domain }}" checked />
+          {{ domain.replace('_', ' ').title() }}
+        </label>
+        {% endfor %}
+      </div>
+
+      <label>XW Hypercube Angle <span id="xwVal"></span>
+        <input type="range" id="xwAngle" min="0" max="180" value="35" />
+      </label>
+
+      <label>YZ Hypercube Angle <span id="yzVal"></span>
+        <input type="range" id="yzAngle" min="0" max="180" value="20" />
+      </label>
+
+      <label>Chalk Surface Density <span id="densityVal"></span>
+        <input type="range" id="density" min="0.1" max="1.0" step="0.05" value="0.5" />
+      </label>
+
+      <label>Line Stroke Thickness <span id="strokeVal"></span>
+        <input type="range" id="stroke" min="1" max="8" value="2" />
+      </label>
+
+      <label>Chalk Luminescence Glow <span id="glowVal"></span>
+        <input type="range" id="glow" min="0" max="1" step="0.05" value="0.45" />
+      </label>
+
+      <label>Floor Shear Perspective <span id="shearVal"></span>
+        <input type="range" id="shear" min="-0.5" max="0.5" step="0.02" value="0.18" />
+      </label>
+
+      <button id="exportBtn">Export High-Res Render</button>
+      <p id="status"></p>
+    </aside>
+
+    <main class="viewer">
+      <img id="renderedImage" alt="Rendered output" />
+    </main>
+  </div>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
